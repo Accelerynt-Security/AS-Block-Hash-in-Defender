@@ -11,6 +11,8 @@ This playbook is intended to be run from a Microsoft Sentinel Incident. It will 
                                                                                                                                      
 ![BlockHashInDefender_Demo_1](Images/BlockHashInDefender_Demo_1.png)
 
+![BlockHashInDefender_Demo_2](Images/BlockHashInDefender_Demo_2.png)
+
 
 #
 ### Requirements
