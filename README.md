@@ -114,7 +114,7 @@ In the **Instance Details** section:
 
 * **Key Vault Name**: Enter the name of the key vault referenced in [Create an Azure Key Vault Secret](https://github.com/Accelerynt-Security/AS-Block-Hash-in-Defender#create-an-azure-key-vault-secret).
 
-* **Secret Name**: Enter the name of the key vault Secret created in [Create an Azure Key Vault Secret](https://github.com/Accelerynt-Security/AS-Block-Hash-in-Defender#create-an-azure-key-vault-secret).
+* **Key Vault Secret Name**: Enter the name of the key vault Secret created in [Create an Azure Key Vault Secret](https://github.com/Accelerynt-Security/AS-Block-Hash-in-Defender#create-an-azure-key-vault-secret).
 
 Towards the bottom, click on "**Review + create**". 
 
