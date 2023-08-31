@@ -36,7 +36,7 @@
                 "description" : "Name of the Key Vault that stores the App Registration client secret"
             }
         },
-        "SecretName": {
+        "KeyVaultSecretName": {
             "type": "string",
             "metadata": {
                 "description": "Name of Key Vault Secret that contains the App Registration client secret"
@@ -234,7 +234,11 @@
                             "type": "Foreach"
                         },
                         "Get_Client_Secret": {
-                            "runAfter": {},
+                            "runAfter": {
+                                "Entities_-_Get_FileHashes": [
+                                    "Succeeded"
+                                ]
+                            },
                             "type": "ApiConnection",
                             "inputs": {
                                 "host": {
