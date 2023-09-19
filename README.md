@@ -7,7 +7,7 @@ For any technical questions, please contact info@accelerynt.com
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAccelerynt-Security%2FAS-Block-Hash-in-Defender%2Fmain%2Fazuredeploy.json)
 [![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAccelerynt-Security%2FAS-Block-Hash-in-Defender%2Fmain%2Fazuredeploy.json)       
 
-This playbook is intended to be run from a Microsoft Sentinel Incident. It will take the File Hashes from the Incident entities list and block them in Defender. A comment noting the affected File Hashes will be added to the Incident.
+This playbook is intended to be run from a Microsoft Sentinel Incident. It will take the SHA256 File Hashes from the Incident entities list and block them in Defender. A comment noting the affected File Hashes will be added to the Incident.
                                                                                                                                      
 ![BlockHashInDefender_Demo_1](Images/BlockHashInDefender_Demo_1.png)
 
