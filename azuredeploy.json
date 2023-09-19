@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "metadata": {
         "title": "AS-Block-Hash-in-Defender", 
-        "description": "This playbook is intended to be run from a Microsoft Sentinel Incident. It will take the File Hashes from the Incident entities list and block them in Defender. A comment noting the affected File Hashes will be added to the Incident.",
+        "description": "This playbook is intended to be run from a Microsoft Sentinel Incident. It will take the SHA256 File Hashes from the Incident entities list and block them in Defender. A comment noting the affected File Hashes will be added to the Incident.",
         "prerequisites": "1. An App Registration with TI.ReadWrite permission granted on WindowsDefenderATP. 2. A client secret for the App Registration must be generated. 3. An Azure Key Vault Secret to hold the client secret. Support for the set up and configuration of each of these items can be found here: https://github.com/Accelerynt-Security/AS-Block-Hash-in-Defender",
         "postDeployment": ["Access to the Azure Key Vault must be granted to the playbook","The Microsoft Sentinel Contributor role must be applied to the playbook"],
         "lastUpdateTime": "2023-08-28T8:21:03Z",
@@ -131,7 +131,7 @@
                                     "inputs": {
                                         "body": {
                                             "incidentArmId": "@triggerBody()?['object']?['id']",
-                                            "message": "<p><strong>Blocked the following file hashes in Defender:<br>\n</strong>@{variables('Blocked File Hashes')}<br>\n</p>"
+                                            "message": "<p><strong>Blocked the following SHA256 file hashes in Defender:<br>\n</strong>@{variables('Blocked File Hashes')}<br>\n</p>"
                                         },
                                         "host": {
                                             "connection": {
@@ -177,55 +177,71 @@
                             "type": "ApiConnection"
                         },
                         "For_each": {
+                            "foreach": "@body('Entities_-_Get_FileHashes')?['Filehashes']",
                             "actions": {
-                                "Condition_-_File_Hash_Successfully_Blocked": {
+                                "Condition_-_Check_File_Hash_Type": {
                                     "actions": {
-                                        "Append_to_string_variable": {
-                                            "inputs": {
-                                                "name": "Blocked File Hashes",
-                                                "value": "@items('For_each')?['hashValue']"
+                                        "Condition_-_File_Hash_Successfully_Blocked": {
+                                            "actions": {
+                                                "Append_to_string_variable": {
+                                                    "runAfter": {},
+                                                    "type": "AppendToStringVariable",
+                                                    "inputs": {
+                                                        "name": "Blocked File Hashes",
+                                                        "value": "@items('For_each')?['hashValue']"
+                                                    }
+                                                }
                                             },
+                                            "runAfter": {
+                                                "HTTP_-_Add_Defender_IOC": [
+                                                    "Succeeded"
+                                                ]
+                                            },
+                                            "expression": {
+                                                "and": [
+                                                    {
+                                                        "equals": [
+                                                            "@outputs('HTTP_-_Add_Defender_IOC')['statusCode']",
+                                                            200
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "type": "If"
+                                        },
+                                        "HTTP_-_Add_Defender_IOC": {
                                             "runAfter": {},
-                                            "type": "AppendToStringVariable"
+                                            "type": "Http",
+                                            "inputs": {
+                                                "body": {
+                                                    "action": "Block",
+                                                    "description": "[concat(parameters('PlaybookName'), ' Playbook run on incident @{triggerBody()?[''object'']?[''properties'']?[''incidentNumber'']}')]",
+                                                    "indicatorType": "FileSha256",
+                                                    "indicatorValue": "@items('For_each')?['hashValue']",
+                                                    "title": "Sentinel Automation - @{triggerBody()?['object']?['properties']?['title']}"
+                                                },
+                                                "headers": {
+                                                    "Authorization": "Bearer @{body('Parse_JSON')?['access_token']}"
+                                                },
+                                                "method": "POST",
+                                                "uri": "https://api.securitycenter.microsoft.com/api/indicators"
+                                            }
                                         }
                                     },
+                                    "runAfter": {},
                                     "expression": {
                                         "and": [
                                             {
                                                 "equals": [
-                                                    "@outputs('HTTP_-_Add_Defender_IOC')['statusCode']",
-                                                    200
+                                                    "@items('For_each')?['algorithm']",
+                                                    "SHA256"
                                                 ]
                                             }
                                         ]
                                     },
-                                    "runAfter": {
-                                        "HTTP_-_Add_Defender_IOC": [
-                                            "Succeeded"
-                                        ]
-                                    },
                                     "type": "If"
-                                },
-                                "HTTP_-_Add_Defender_IOC": {
-                                    "inputs": {
-                                        "body": {
-                                            "action": "Block",
-                                            "description": "test",
-                                            "indicatorType": "FileSha256",
-                                            "indicatorValue": "@items('For_each')?['hashValue']",
-                                            "title": "Test-Playbook"
-                                        },
-                                        "headers": {
-                                            "Authorization": "Bearer @{body('Parse_JSON')?['access_token']}"
-                                        },
-                                        "method": "POST",
-                                        "uri": "https://api.securitycenter.microsoft.com/api/indicators"
-                                    },
-                                    "runAfter": {},
-                                    "type": "Http"
                                 }
                             },
-                            "foreach": "@body('Entities_-_Get_FileHashes')?['Filehashes']",
                             "runAfter": {
                                 "Initialize_variable_-_Blocked_File_Hashes": [
                                     "Succeeded"
